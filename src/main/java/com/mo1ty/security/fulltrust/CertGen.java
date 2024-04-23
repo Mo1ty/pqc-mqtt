@@ -9,7 +9,6 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 import org.bouncycastle.pqc.jcajce.spec.FalconParameterSpec;
 
 import java.math.BigInteger;
@@ -79,7 +78,7 @@ public class CertGen {
         return baseCert;
     }
 
-    public byte[] signMessage(X509Certificate certificate, KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
+    public byte[] signMessage(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA3-512");
         Signature falconSign = Signature.getInstance("Falcon-1024", "BC");
         falconSign.initSign(keyPair.getPrivate());
@@ -88,7 +87,7 @@ public class CertGen {
         return signature;
     }
 
-    public byte[] hashAndSignMessage(X509Certificate certificate, KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
+    public byte[] hashAndSignMessage(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA3-512");
         Signature falconSign = Signature.getInstance("Falcon-1024", "BC");
         falconSign.initSign(keyPair.getPrivate());

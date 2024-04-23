@@ -1,5 +1,6 @@
 import com.mo1ty.mqtt.publisher.MqttPublisher;
 import com.mo1ty.security.fulltrust.CertGen;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 
 import java.io.UnsupportedEncodingException;
@@ -7,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
 import java.util.Random;
 import java.util.Timer;
@@ -32,7 +34,7 @@ public class Application {
             Long certificateLength = 6 * 24 * 60 * 60 * 1000L; // 6 days
             X509Certificate certificate = certGen.genSelfSignedCert(falconKeyPair, certificateLength);
 
-            byte[] signature = certGen.hashAndSignMessage(certificate, falconKeyPair, plaintext);
+            byte[] signature = certGen.hashAndSignMessage(falconKeyPair, plaintext);
 
             System.out.println(certGen.verifyMessage(falconKeyPair.getPublic(), plaintext, signature));
             System.out.println(certGen.verifyHashedMessage(falconKeyPair.getPublic(), plaintext, signature));
