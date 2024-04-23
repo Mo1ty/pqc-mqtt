@@ -20,7 +20,7 @@ dependencies {
     // testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
-mainClassName = 'Application'
+mainClassName = 'PublisherApp'
 
 tasks.test {
     useJUnitPlatform()
