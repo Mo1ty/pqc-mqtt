@@ -3,13 +3,16 @@ import com.mo1ty.mqtt.MqttMsgPayload;
 import com.mo1ty.mqtt.publisher.MqttPublisher;
 import com.mo1ty.security.fulltrust.CertGen;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.util.encoders.Base64;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertPath;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -27,8 +30,8 @@ public class PublisherApp {
         String connectionUrl = "tcp://192.168.0.208:1883";
         String connId = "PC_TEST";
         String topic = "test/topic";
-        CertGen certGen = new CertGen();
 
+        /*
         MqttPublisher client = new MqttPublisher(connectionUrl, connId);
         client.connectClient();
         int i = 0;
@@ -39,11 +42,53 @@ public class PublisherApp {
             Thread.sleep(1000);
             client.connectClient();
         }
+        */
+
+        CertGen certGen = new CertGen();
 
         KeyPair falconKeyPair = certGen.generateKeyPair("Falcon", 1024);
         Long certificateLength = 6 * 24 * 60 * 60 * 1000L; // 6 days
         X509Certificate certificate = certGen.genSelfSignedCert(falconKeyPair, certificateLength);
 
+        Random rand = new Random();
+
+        String number = String.valueOf(rand.nextInt(100));
+        MessageStruct messageStruct = new MessageStruct(number, topic);
+        byte[] signature = certGen.hashAndSignMessage(falconKeyPair, messageStruct.getBytes());
+
+        MqttMsgPayload msgPayload = new MqttMsgPayload();
+        msgPayload.messageStruct = messageStruct;
+        msgPayload.signature = Base64.encode(signature);
+        msgPayload.x509Certificate = Base64.encode(certificate.getEncoded());
+
+        // byte[] jsonData = msgPayload.toJsonString().getBytes(StandardCharsets.UTF_8);
+
+
+
+
+        File file = new File("C:/Users/Mo1ty/Desktop/totalFile_encoded.txt");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        writer.write(Arrays.toString(msgPayload.encodeInfo()));
+        writer.close();
+
+
+
+
+
+        MqttMsgPayload msg = new MqttMsgPayload(); // = MqttMsgPayload.getFromJsonString(jsonData);
+
+        CertGen newCertGen = new CertGen();
+
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        InputStream in = new ByteArrayInputStream(msg.x509Certificate);
+        X509Certificate cert = (X509Certificate)cf.generateCertificate(in);
+
+        System.out.println(newCertGen.verifyHashedMessage(
+                cert.getPublicKey(),
+                msg.messageStruct.getBytes(),
+                msg.signature));
+
+        /*
         System.out.println("Connected successfully!");
         Random rand = new Random();
         new Timer().schedule(new TimerTask() {
@@ -58,6 +103,10 @@ public class PublisherApp {
                     msgPayload.signature = signature;
                     msgPayload.x509Certificate = certificate;
 
+                    byte[] jsonData = msgPayload.toJsonString().getBytes(StandardCharsets.UTF_8);
+
+                    System.out.println(jsonData);
+
                     client.publishMessage(topic, prepareQos2Message(number));
                     System.out.println("Successfully published message \"" + number + "\" on topic \"" + topic + "\"!");
 
@@ -67,7 +116,16 @@ public class PublisherApp {
             }
         }, 0, 100);
 
+         */
 
         System.out.println("Message sent!");
+    }
+
+    static void writeCertToFileBase64Encoded(X509Certificate certificate, String fileName) throws Exception {
+        FileOutputStream certificateOut = new FileOutputStream(fileName);
+        certificateOut.write("-----BEGIN CERTIFICATE-----".getBytes());
+        certificateOut.write(Base64.encode(certificate.getEncoded()));
+        certificateOut.write("-----END CERTIFICATE-----".getBytes());
+        certificateOut.close();
     }
 }

@@ -1,12 +1,10 @@
 package com.mo1ty.mqtt.publisher;
 
-import com.mo1ty.security.fulltrust.CertGen;
 import org.eclipse.paho.mqttv5.client.*;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 
-import java.nio.charset.StandardCharsets;
 
 
 public class MqttPublisher {

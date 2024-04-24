@@ -1,9 +1,10 @@
 package com.mo1ty.mqtt;
 
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 
-public class MessageStruct {
+public class MessageStruct implements Serializable {
 
     public String plainMessage;
     public Timestamp timestamp;
@@ -14,6 +15,15 @@ public class MessageStruct {
         mqttTopic = topic;
 
         timestamp = new Timestamp(System.currentTimeMillis());
+    }
+
+    public MessageStruct(){}
+
+    public MessageStruct(String plainTextMsg, String topic, Timestamp timestamp){
+        plainMessage = plainTextMsg;
+        mqttTopic = topic;
+
+        this.timestamp = timestamp;
     }
 
     @Override
