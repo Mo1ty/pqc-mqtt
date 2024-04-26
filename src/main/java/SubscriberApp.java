@@ -1,5 +1,5 @@
 import com.mo1ty.mqtt.subscriber.MqttSubscriber;
-import com.mo1ty.security.fulltrust.CertGen;
+import com.mo1ty.utils.SignUtil;
 
 
 public class SubscriberApp {
@@ -9,7 +9,7 @@ public class SubscriberApp {
         String connectionUrl = "tcp://192.168.0.208:1883";
         String connId = "PC_TEST";
         String topic = "test/topic";
-        CertGen certGen = new CertGen();
+        SignUtil signUtil = new SignUtil();
 
         MqttSubscriber client = new MqttSubscriber(connectionUrl, connId);
         client.connectClient();

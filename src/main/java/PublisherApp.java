@@ -1,21 +1,17 @@
 import com.mo1ty.mqtt.MessageStruct;
 import com.mo1ty.mqtt.MqttMsgPayload;
-import com.mo1ty.mqtt.publisher.MqttPublisher;
-import com.mo1ty.security.fulltrust.CertGen;
-import org.bouncycastle.cert.X509CertificateHolder;
+import com.mo1ty.utils.SignUtil;
+import com.mo1ty.security.cert.CertificateGenerator;
+import com.mo1ty.security.cert.FalconCertificateGenerator;
 import org.bouncycastle.util.encoders.Base64;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.cert.CertPath;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class PublisherApp {
     private static MqttMessage prepareQos2Message(String messageText){
@@ -30,6 +26,7 @@ public class PublisherApp {
         String connectionUrl = "tcp://192.168.0.208:1883";
         String connId = "PC_TEST";
         String topic = "test/topic";
+        SignUtil signUtil = new SignUtil();
 
         /*
         MqttPublisher client = new MqttPublisher(connectionUrl, connId);
@@ -44,9 +41,9 @@ public class PublisherApp {
         }
         */
 
-        CertGen certGen = new CertGen();
+        CertificateGenerator certGen = new FalconCertificateGenerator();
 
-        KeyPair falconKeyPair = certGen.generateKeyPair("Falcon", 1024);
+        KeyPair falconKeyPair = certGen.generateKeyPair();
         Long certificateLength = 6 * 24 * 60 * 60 * 1000L; // 6 days
         X509Certificate certificate = certGen.genSelfSignedCert(falconKeyPair, certificateLength);
 
@@ -54,7 +51,7 @@ public class PublisherApp {
 
         String number = String.valueOf(rand.nextInt(100));
         MessageStruct messageStruct = new MessageStruct(number, topic);
-        byte[] signature = certGen.hashAndSignMessage(falconKeyPair, messageStruct.getBytes());
+        byte[] signature = signUtil.hashAndSignMessage(falconKeyPair, messageStruct.getBytes());
 
         MqttMsgPayload msgPayload = new MqttMsgPayload();
         msgPayload.messageStruct = messageStruct;
@@ -77,7 +74,7 @@ public class PublisherApp {
 
         MqttMsgPayload msg = new MqttMsgPayload(); // = MqttMsgPayload.getFromJsonString(jsonData);
 
-        CertGen newCertGen = new CertGen();
+        SignUtil newCertGen = new SignUtil();
 
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         InputStream in = new ByteArrayInputStream(msg.x509Certificate);
