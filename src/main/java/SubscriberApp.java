@@ -1,5 +1,5 @@
 import com.mo1ty.mqtt.subscriber.MqttSubscriber;
-import com.mo1ty.utils.SignUtil;
+import com.mo1ty.security.cert.SignUtil;
 
 
 public class SubscriberApp {

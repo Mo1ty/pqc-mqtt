@@ -1,4 +1,4 @@
-package com.mo1ty.utils;
+package com.mo1ty.security.cert;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.*;
