@@ -1,10 +1,10 @@
 package com.mo1ty.mqtt.subscriber;
 
-import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
-import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.mqttv5.client.*;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 
 public class MqttSubscriber {
 
@@ -39,7 +39,7 @@ public class MqttSubscriber {
         }
     }
 
-    public void connectClient() {
+    public MqttAsyncClient connectClient() {
         try{
             if(mqttConnectionOptions == null)
                 this.mqttClient.connect();
@@ -54,11 +54,44 @@ public class MqttSubscriber {
             System.out.println("excep "+me);
             me.printStackTrace();
         }
+        return mqttClient;
     }
 
-    public void publishMessage(String topic, MqttMessage message) {
+    public IMqttToken subscribeToMessage(String topic) {
+        MqttMessage mqttMessage = new MqttMessage();
         try {
-            this.mqttClient.publish(topic, message);
+            this.mqttClient.setCallback(new MqttCallback() {
+                @Override
+                public void disconnected(MqttDisconnectResponse disconnectResponse) {
+
+                }
+
+                @Override
+                public void mqttErrorOccurred(MqttException exception) {
+
+                }
+
+                @Override
+                public void messageArrived(String topic, MqttMessage message) throws Exception {
+                    message = mqttMessage;
+                }
+
+                @Override
+                public void deliveryComplete(IMqttToken token) {
+
+                }
+
+                @Override
+                public void connectComplete(boolean reconnect, String serverURI) {
+
+                }
+
+                @Override
+                public void authPacketArrived(int reasonCode, MqttProperties properties) {
+
+                }
+            });
+            return this.mqttClient.subscribe(topic, 2);
         }
         catch(MqttException me) {
             System.out.println("reason "+me.getReasonCode());
@@ -68,6 +101,7 @@ public class MqttSubscriber {
             System.out.println("excep "+me);
             me.printStackTrace();
         }
+        return null;
     }
 
     public String getBrokerUrl() {

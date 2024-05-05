@@ -7,14 +7,14 @@ import java.sql.Timestamp;
 public class MessageStruct implements Serializable {
 
     public String plainMessage;
-    public Timestamp timestamp;
+    public Long timestamp;
     public String mqttTopic;
 
     public MessageStruct(String plainTextMsg, String topic){
         plainMessage = plainTextMsg;
         mqttTopic = topic;
 
-        timestamp = new Timestamp(System.currentTimeMillis());
+        timestamp = new Timestamp(System.currentTimeMillis()).getTime();
     }
 
     public MessageStruct(){}
@@ -23,7 +23,7 @@ public class MessageStruct implements Serializable {
         plainMessage = plainTextMsg;
         mqttTopic = topic;
 
-        this.timestamp = timestamp;
+        this.timestamp = timestamp.getTime();
     }
 
     @Override
