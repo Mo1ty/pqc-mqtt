@@ -3,6 +3,9 @@ import com.mo1ty.mqtt.MqttMsgPayload;
 import com.mo1ty.mqtt.publisher.MqttPublisher;
 import com.mo1ty.security.fulltrust.CertGen;
 import org.bouncycastle.util.encoders.Base64;
+import org.eclipse.paho.mqttv5.client.IMqttToken;
+import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
+import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 
 import java.io.*;
@@ -15,22 +18,14 @@ public class SecLv1PublisherApp {
     private static MqttMessage prepareQos2Message(String messageText){
         MqttMessage msg = new MqttMessage();
         msg.setQos(2);
-        msg.setPayload(messageText.getBytes());
+        msg.setPayload(messageText.getBytes(StandardCharsets.UTF_8));
         return msg;
     }
 
-    private static MqttPublisher createAndConnect(String connectionUrl, String connectionId) throws Exception{
-        MqttPublisher client = new MqttPublisher(connectionUrl, connectionId);
-        client.connectClient();
-        int i = 0;
-        while(!client.getMqttClient().isConnected()){
-            // Endless loop until connected;
-            i++;
-            System.out.println("Waiting for connection for " + i + " seconds...");
-            Thread.sleep(1000);
-            client.connectClient();
-        }
-
+    private static MqttAsyncClient createAndConnect(String connectionUrl, String connectionId) throws Exception{
+        MqttAsyncClient client = new MqttAsyncClient(connectionUrl, connectionId, new MemoryPersistence());
+        IMqttToken token = client.connect();
+        token.waitForCompletion();
         return client;
     }
 

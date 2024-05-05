@@ -1,7 +1,5 @@
 import com.mo1ty.mqtt.MessageStruct;
 import com.mo1ty.mqtt.MqttMsgPayload;
-import com.mo1ty.mqtt.publisher.MqttPublisher;
-import com.mo1ty.mqtt.subscriber.MqttSubscriber;
 import com.mo1ty.security.fulltrust.CertGen;
 import org.bouncycastle.util.encoders.Base64;
 import org.eclipse.paho.mqttv5.client.*;
@@ -77,7 +75,7 @@ public class SecLv1SubscriberApp {
             }
         });
 
-        mqttClient.connect();
+        mqttClient.connect().waitForCompletion();
         mqttClient.subscribe(topic, 2);
 
         int i = 0;

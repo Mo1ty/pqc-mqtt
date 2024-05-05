@@ -101,23 +101,4 @@ public class MqttPublisher {
         return mqttClient;
     }
 
-    public void setMqttClient(MqttAsyncClient mqttClient) {
-        this.mqttClient = mqttClient;
-    }
-
-    public int getQos() {
-        return qos;
-    }
-
-    public void setQos(int qos) {
-        this.qos = qos;
-    }
-
-    public MqttConnectionOptions getMqttConnectionOptions() {
-        return mqttConnectionOptions;
-    }
-
-    public void setMqttConnectionOptions(MqttConnectionOptions mqttConnectionOptions) {
-        this.mqttConnectionOptions = mqttConnectionOptions;
-    }
 }
