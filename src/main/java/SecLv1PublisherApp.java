@@ -1,6 +1,5 @@
 import com.mo1ty.mqtt.MessageStruct;
 import com.mo1ty.mqtt.MqttMsgPayload;
-import com.mo1ty.mqtt.publisher.MqttPublisher;
 import com.mo1ty.security.fulltrust.CertGen;
 import org.bouncycastle.util.encoders.Base64;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
@@ -41,9 +40,9 @@ public class SecLv1PublisherApp {
         return msgPayload.toJsonString().getBytes(StandardCharsets.UTF_8);
     }
 
-    private static void sendMessage(String message, String topic, MqttPublisher client){
+    private static void sendMessage(String message, String topic, MqttAsyncClient client){
         try {
-            client.publishMessage(topic, prepareQos2Message(message));
+            client.publish(topic, prepareQos2Message(message));
             System.out.println("Successfully published message \"" + message + "\" on topic \"" + topic + "\"!");
 
         } catch (Exception e) {

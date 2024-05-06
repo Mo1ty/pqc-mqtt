@@ -1,7 +1,6 @@
 import com.mo1ty.mqtt.EncryptedPayload;
 import com.mo1ty.mqtt.MessageStruct;
 import com.mo1ty.mqtt.MqttMsgPayload;
-import com.mo1ty.mqtt.publisher.MqttPublisher;
 import com.mo1ty.security.crypto.KyberClientUtil;
 import com.mo1ty.security.fulltrust.CertGen;
 import org.bouncycastle.util.encoders.Base64;
