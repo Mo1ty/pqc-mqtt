@@ -12,6 +12,7 @@ import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
@@ -57,9 +58,11 @@ public class SecLv2PublisherApp {
     public static void main(String[] args) throws Exception {
 
         String connectionUrl = "tcp://192.168.0.208:1883";
-        String connId = "PC_TEST";
+        String connId = "PC_TEST_PUB_2";
         String topic = "test/topic";
         String testMessage = "INIT_CONN_2";
+        String responseTopic = "test/topic/response";
+        String deviceIdentifier = "RPI_ZERO_W_1";
 
         MqttAsyncClient client = createAndConnect(connectionUrl, connId);
 
@@ -77,7 +80,10 @@ public class SecLv2PublisherApp {
         msgPayload.messageStruct = messageStruct;
         msgPayload.signature = Base64.encode(signature);
         msgPayload.x509Certificate = certificate.getEncoded();
-        byte[] jsonData = msgPayload.toJsonString().getBytes(StandardCharsets.UTF_8);
+        String jsonData = msgPayload.toJsonString();
+        MqttMessage initialMessage = prepareQos2Message(jsonData);
+        initialMessage.getProperties().setResponseTopic(responseTopic);
+        initialMessage.getProperties().getUserProperties().add(new UserProperty("DEVICE_IDENTIFIER", deviceIdentifier));
 
 
         // RECEIVE A KYBER PUBLIC KEY FOR FURTHER COMMUNICATION
