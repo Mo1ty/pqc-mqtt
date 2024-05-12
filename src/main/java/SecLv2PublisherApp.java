@@ -75,7 +75,7 @@ public class SecLv2PublisherApp {
 
         // SET UP MESSAGE PAYLOAD AND TRANSFORM INTO BYTE ARRAY TO SEND
         MessageStruct messageStruct = new MessageStruct(testMessage, topic);
-        byte[] signature = certGen.hashAndSignMessage(falconKeyPair, messageStruct.getBytes());
+        byte[] signature = certGen.hashAndSignMessage(falconKeyPair, messageStruct.toJsonStringAsBytes());
         MqttMsgPayload msgPayload = new MqttMsgPayload();
         msgPayload.messageStruct = messageStruct;
         msgPayload.signature = Base64.encode(signature);

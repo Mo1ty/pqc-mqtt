@@ -1,8 +1,9 @@
 package com.mo1ty.mqtt;
 
-import com.fasterxml.jackson.jr.ob.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 
 public class MqttMsgPayload implements Serializable {
 
@@ -13,11 +14,13 @@ public class MqttMsgPayload implements Serializable {
 
 
     public String toJsonString() throws Exception {
-        return JSON.std.with(JSON.Feature.PRETTY_PRINT_OUTPUT)
-                .asString(this);
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writer().writeValueAsString(this);
     }
 
     public static MqttMsgPayload getFromJsonString(byte[] jsonString) throws Exception {
-        return JSON.std.with(JSON.Feature.PRETTY_PRINT_OUTPUT).beanFrom(MqttMsgPayload.class, jsonString);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonStr = new String(jsonString, StandardCharsets.UTF_8);
+        return objectMapper.reader().readValue(jsonStr, MqttMsgPayload.class);
     }
 }

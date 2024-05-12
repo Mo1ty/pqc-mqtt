@@ -1,5 +1,6 @@
 import com.mo1ty.mqtt.MessageStruct;
 import com.mo1ty.mqtt.MqttMsgPayload;
+import com.mo1ty.mqtt.publisher.MqttPublisher;
 import com.mo1ty.security.fulltrust.CertGen;
 import org.bouncycastle.util.encoders.Base64;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
@@ -12,6 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SecLv1PublisherApp {
     private static MqttMessage prepareQos2Message(String messageText){
@@ -23,27 +26,29 @@ public class SecLv1PublisherApp {
 
     private static MqttAsyncClient createAndConnect(String connectionUrl, String connectionId) throws Exception{
         MqttAsyncClient client = new MqttAsyncClient(connectionUrl, connectionId, new MemoryPersistence());
+        System.out.println("CONNECTION INITIATED!");
         IMqttToken token = client.connect();
         token.waitForCompletion();
+        System.out.println("CLIENT CONNECTED!");
         return client;
     }
 
-    private static byte[] payloadToBytes(String message, String topic, CertGen certGen, KeyPair falconKeyPair, byte[] certificate) throws Exception{
+    private static String payloadToBytes(String message, String topic, CertGen certGen, KeyPair falconKeyPair, byte[] certificate) throws Exception{
         MessageStruct messageStruct = new MessageStruct(message, topic);
-        byte[] signature = certGen.hashAndSignMessage(falconKeyPair, messageStruct.getBytes());
+        byte[] signature = certGen.hashAndSignMessage(falconKeyPair, messageStruct.toJsonStringAsBytes());
 
         MqttMsgPayload msgPayload = new MqttMsgPayload();
         msgPayload.messageStruct = messageStruct;
         msgPayload.signature = signature;
         msgPayload.x509Certificate = certificate;
 
-        return msgPayload.toJsonString().getBytes(StandardCharsets.UTF_8);
+        return msgPayload.toJsonString();
     }
 
     private static void sendMessage(String message, String topic, MqttAsyncClient client){
         try {
             client.publish(topic, prepareQos2Message(message));
-            System.out.println("Successfully published message \"" + message + "\" on topic \"" + topic + "\"!");
+            // System.out.println("Successfully published message \"" + message + "\" on topic \"" + topic + "\"!");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -52,29 +57,36 @@ public class SecLv1PublisherApp {
 
     public static void main(String[] args) throws Exception {
 
-        String connectionUrl = "tcp://192.168.0.208:1883";
-        String connId = "PC_TEST";
+        String connectionUrl = "tcp://192.168.0.249:1883";
+        String connId = "PC_PUB_LV1";
         String topic = "test/topic";
         String testMessage = "TEST_MESSAGE";
 
-        /*
-        MqttPublisher client = createAndConnect(connectionUrl, connId);
-        */
+        System.out.println(testMessage);
+
+        MqttAsyncClient client = createAndConnect(connectionUrl, connId);
 
         // GENERATE A SELF-SIGNED CERTIFICATE TO SIGN AND VERIFY MESSAGES
+        System.out.println("CERTIFICATE INITIATED!");
         CertGen certGen = new CertGen();
         KeyPair falconKeyPair = certGen.generateKeyPair("Falcon", 1024);
         Long certificateLength = 6 * 24 * 60 * 60 * 1000L; // 6 days
         X509Certificate certificate = certGen.genSelfSignedCert(falconKeyPair, certificateLength);
+        System.out.println("CERTIFICATE DONE!");
 
         // SET UP MESSAGE PAYLOAD AND TRANSFORM INTO BYTE ARRAY TO SEND
         MessageStruct messageStruct = new MessageStruct(testMessage, topic);
-        byte[] signature = certGen.hashAndSignMessage(falconKeyPair, messageStruct.getBytes());
+        byte[] jsStr = messageStruct.toJsonStringAsBytes();
+        byte[] signature = certGen.hashAndSignMessage(falconKeyPair, jsStr);
         MqttMsgPayload msgPayload = new MqttMsgPayload();
         msgPayload.messageStruct = messageStruct;
-        msgPayload.signature = Base64.encode(signature);
+        msgPayload.signature = signature;
         msgPayload.x509Certificate = certificate.getEncoded();
+
+        System.out.println("CREATING JSON STRING AS BYTES!");
         byte[] jsonData = msgPayload.toJsonString().getBytes(StandardCharsets.UTF_8);
+        System.out.println("PAYLOAD SET UP!");
+
 
 
         MqttMsgPayload msg = MqttMsgPayload.getFromJsonString(jsonData);
@@ -83,26 +95,26 @@ public class SecLv1PublisherApp {
         InputStream in = new ByteArrayInputStream(msg.x509Certificate);
         X509Certificate cert = (X509Certificate)cf.generateCertificate(in);
 
+        PublicKey oldPubKey = certificate.getPublicKey();
+        PublicKey newPubkey = cert.getPublicKey();
 
-        System.out.println(newCertGen.verifyHashedMessage(
+        System.out.println("HASH VERIFY IS - " + newCertGen.verifyHashedMessage(
                 cert.getPublicKey(),
-                msg.messageStruct.getBytes(),
-                Base64.decode(msg.signature)));
+                msg.messageStruct.toJsonStringAsBytes(),
+                msg.signature));
 
-        /*
         System.out.println("Connected successfully!");
         new Timer().schedule(new TimerTask() {
             public void run()  {
                 try {
-                    byte[] messageBytes = payloadToBytes(testMessage, topic, certGen, falconKeyPair, certificate.getEncoded());
+                    String messageBytes = payloadToBytes(testMessage, topic, certGen, falconKeyPair, certificate.getEncoded());
                     sendMessage(messageBytes, topic, client);
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        }, 0, 100);
-        */
+        }, 0, 1000);
 
 
         System.out.println("Message sent!");

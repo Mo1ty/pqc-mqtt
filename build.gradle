@@ -14,16 +14,17 @@ dependencies {
     implementation("org.eclipse.paho:org.eclipse.paho.mqttv5.client:1.2.5")
     implementation("org.bouncycastle:bcprov-jdk18on:1.77")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.77")
-    implementation("com.fasterxml.jackson.jr:jackson-jr-objects:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
 }
 
-mainClassName = 'PublisherApp'
+
 
 tasks.test {
     useJUnitPlatform()
 }
 
-task fatJar(type: Jar) {
+task sec1Publisher(type: Jar) {
+    mainClassName = 'SecLv1PublisherApp'
     doFirst {
         from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     }

@@ -53,7 +53,7 @@ public class SecLv2SubscriberApp {
 
                 System.out.println("Message received successfully! Does signature work? - " + newCertGen.verifyHashedMessage(
                         cert.getPublicKey(),
-                        msg.messageStruct.getBytes(),
+                        msg.messageStruct.toJsonStringAsBytes(),
                         Base64.decode(msg.signature)));
             }
 

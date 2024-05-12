@@ -10,8 +10,6 @@ import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -21,8 +19,8 @@ public class SecLv1SubscriberApp {
 
     public static void main(String[] args) throws Exception {
 
-        String connectionUrl = "tcp://192.168.0.208:1883";
-        String connId = "PC_TEST";
+        String connectionUrl = "tcp://192.168.0.249:1883";
+        String connId = "PC_SUB_LV1";
         String topic = "test/topic";
         String testMessage = "TEST_MESSAGE";
 
@@ -55,8 +53,9 @@ public class SecLv1SubscriberApp {
 
                 System.out.println("Message received successfully! Does signature work? - " + newCertGen.verifyHashedMessage(
                         cert.getPublicKey(),
-                        msg.messageStruct.getBytes(),
-                        Base64.decode(msg.signature)));
+                        msg.messageStruct.toJsonStringAsBytes(),
+                        msg.signature));
+                System.out.println(msg.messageStruct.plainMessage);
             }
 
             @Override
