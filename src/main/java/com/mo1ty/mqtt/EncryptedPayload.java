@@ -6,8 +6,19 @@ import java.nio.charset.StandardCharsets;
 
 public class EncryptedPayload {
 
-    public String encryptedMessage;
+    public byte[] encryptedMessage;
     public String algorithmIdentifier;
+    public byte[] signature;
+    public byte[] x509Certificate;
+
+    public EncryptedPayload(){}
+
+    public EncryptedPayload(byte[] encryptedMessage, String algorithmIdentifier, byte[] signature, byte[] x509Certificate) {
+        this.encryptedMessage = encryptedMessage;
+        this.algorithmIdentifier = algorithmIdentifier;
+        this.signature = signature;
+        this.x509Certificate = x509Certificate;
+    }
 
     public String toJsonString() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();

@@ -87,22 +87,6 @@ public class SecLv1PublisherApp {
         byte[] jsonData = msgPayload.toJsonString().getBytes(StandardCharsets.UTF_8);
         System.out.println("PAYLOAD SET UP!");
 
-
-
-        MqttMsgPayload msg = MqttMsgPayload.getFromJsonString(jsonData);
-        CertGen newCertGen = new CertGen();
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        InputStream in = new ByteArrayInputStream(msg.x509Certificate);
-        X509Certificate cert = (X509Certificate)cf.generateCertificate(in);
-
-        PublicKey oldPubKey = certificate.getPublicKey();
-        PublicKey newPubkey = cert.getPublicKey();
-
-        System.out.println("HASH VERIFY IS - " + newCertGen.verifyHashedMessage(
-                cert.getPublicKey(),
-                msg.messageStruct.toJsonStringAsBytes(),
-                msg.signature));
-
         System.out.println("Connected successfully!");
         new Timer().schedule(new TimerTask() {
             public void run()  {
