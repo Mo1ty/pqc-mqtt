@@ -10,10 +10,8 @@ import java.nio.charset.StandardCharsets;
 public class MqttMsgPayload implements Serializable {
 
     public MessageStruct messageStruct;
-    public String algorithmIdentifier;
     public byte[] signature;
     public byte[] x509Certificate;
-
 
 
     public byte[] encodeInfo(){
