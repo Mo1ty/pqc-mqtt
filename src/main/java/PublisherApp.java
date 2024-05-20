@@ -1,6 +1,6 @@
 import com.mo1ty.mqtt.MessageStruct;
 import com.mo1ty.mqtt.MqttMsgPayload;
-import com.mo1ty.security.cert.SignUtil;
+import com.mo1ty.utils.SignUtil;
 import com.mo1ty.security.cert.CertificateGenerator;
 import com.mo1ty.security.cert.FalconCertificateGenerator;
 import org.bouncycastle.util.encoders.Base64;

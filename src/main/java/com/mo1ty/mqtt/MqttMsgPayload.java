@@ -7,22 +7,15 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-/**
- *
- */
 public class MqttMsgPayload implements Serializable {
 
     public MessageStruct messageStruct;
-    // This identifier sets algorithm used for payload encryption
     public String algorithmIdentifier;
     public byte[] signature;
     public byte[] x509Certificate;
 
 
-    /**
-     *
-     * @return
-     */
+
     public byte[] encodeInfo(){
         byte[] message = Base64.encode(messageStruct.plainMessage.getBytes());
         byte[] time = ByteUtil.longToBytes(messageStruct.timestamp.getTime());
