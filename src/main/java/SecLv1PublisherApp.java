@@ -1,22 +1,28 @@
 import com.mo1ty.mqtt.MessageStruct;
 import com.mo1ty.mqtt.MqttMsgPayload;
-import com.mo1ty.mqtt.publisher.MqttPublisher;
 import com.mo1ty.security.fulltrust.CertGen;
+import com.mo1ty.security.fulltrust.FalconGen;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.bouncycastle.util.encoders.Base64;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 
-import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class SecLv1PublisherApp {
+
+    private static int packetNum = -100;
+    private static List<Double> packetTimes = new ArrayList<>();
+
     private static MqttMessage prepareQos2Message(String messageText){
         MqttMessage msg = new MqttMessage();
         msg.setQos(2);
@@ -33,18 +39,6 @@ public class SecLv1PublisherApp {
         return client;
     }
 
-    private static String payloadToBytes(String message, String topic, CertGen certGen, KeyPair falconKeyPair, byte[] certificate) throws Exception{
-        MessageStruct messageStruct = new MessageStruct(message, topic);
-        byte[] signature = certGen.hashAndSignMessage(falconKeyPair, messageStruct.toJsonStringAsBytes());
-
-        MqttMsgPayload msgPayload = new MqttMsgPayload();
-        msgPayload.messageStruct = messageStruct;
-        msgPayload.signature = signature;
-        msgPayload.x509Certificate = certificate;
-
-        return msgPayload.toJsonString();
-    }
-
     private static void sendMessage(String message, String topic, MqttAsyncClient client){
         try {
             client.publish(topic, prepareQos2Message(message));
@@ -55,12 +49,46 @@ public class SecLv1PublisherApp {
         }
     }
 
+    private static void countAvg(){
+        double packetTimeTotal = 0;
+        List<Double> packetTime1percent = new ArrayList<>(10);
+        double packetTimeWorst = 0;
+        for(int i = 0; i < packetTimes.size(); i++){
+            int div = i / 50;
+            int mod = i % 50;
+            double currentPacketTime = packetTimes.get(i);
+
+            if(mod == 0){
+                packetTime1percent.add(div, 0.0);
+            }
+
+            packetTimeTotal += currentPacketTime;
+
+            System.out.println(div);
+            if(currentPacketTime > packetTime1percent.get(div))
+                packetTime1percent.add(div, currentPacketTime);
+            if(currentPacketTime > packetTimeWorst){
+                packetTimeWorst = currentPacketTime;
+            }
+
+        }
+        double packetTime1percentAvg = 0.0;
+        for(int i = 0; i < packetTime1percent.size(); i++){
+            packetTime1percentAvg += packetTime1percent.get(i);
+        }
+
+        System.out.println("All packets sent! " +
+                "\n Average time: " + packetTimeTotal / packetTimes.size() +
+                "\n Average 1% time: " + packetTime1percentAvg / packetTime1percent.size() +
+                "\n Worst packet time: " + packetTimeWorst);
+    }
+
     public static void main(String[] args) throws Exception {
 
         String connectionUrl = "tcp://192.168.0.249:1883";
         String connId = "PC_PUB_LV1";
         String topic = "test/topic";
-        String testMessage = "TEST_MESSAGE";
+        String testMessage = RandomStringUtils.randomAlphanumeric(128);
 
         System.out.println(testMessage);
 
@@ -68,37 +96,47 @@ public class SecLv1PublisherApp {
 
         // GENERATE A SELF-SIGNED CERTIFICATE TO SIGN AND VERIFY MESSAGES
         System.out.println("CERTIFICATE INITIATED!");
-        CertGen certGen = new CertGen();
-        KeyPair falconKeyPair = certGen.generateKeyPair("Falcon", 1024);
+        CertGen certGen = new FalconGen();
+        KeyPair keyPair = certGen.generateKeyPair("falcon");
         Long certificateLength = 6 * 24 * 60 * 60 * 1000L; // 6 days
-        X509Certificate certificate = certGen.genSelfSignedCert(falconKeyPair, certificateLength);
+        X509Certificate certificate = certGen.genSelfSignedCert(keyPair, certificateLength);
         System.out.println("CERTIFICATE DONE!");
 
         // SET UP MESSAGE PAYLOAD AND TRANSFORM INTO BYTE ARRAY TO SEND
-        MessageStruct messageStruct = new MessageStruct(testMessage, topic);
-        byte[] jsStr = messageStruct.toJsonStringAsBytes();
-        byte[] signature = certGen.hashAndSignMessage(falconKeyPair, jsStr);
-        MqttMsgPayload msgPayload = new MqttMsgPayload();
-        msgPayload.messageStruct = messageStruct;
-        msgPayload.signature = signature;
-        msgPayload.x509Certificate = certificate.getEncoded();
-
-        System.out.println("CREATING JSON STRING AS BYTES!");
-        byte[] jsonData = msgPayload.toJsonString().getBytes(StandardCharsets.UTF_8);
-        System.out.println("PAYLOAD SET UP!");
-
         System.out.println("Connected successfully!");
         new Timer().schedule(new TimerTask() {
             public void run()  {
                 try {
-                    String messageBytes = payloadToBytes(testMessage, topic, certGen, falconKeyPair, certificate.getEncoded());
-                    sendMessage(messageBytes, topic, client);
+                    // Create message & start stopwatch
+                    StopWatch stopWatch = new StopWatch();
+                    stopWatch.start();
 
+                    MessageStruct messageStruct = new MessageStruct(testMessage, topic);
+                    byte[] signature = certGen.signMessage(keyPair, messageStruct.toJsonStringAsBytes());
+                    MqttMsgPayload msgPayload = new MqttMsgPayload(
+                            messageStruct,
+                            signature,
+                            certificate.getEncoded()
+                    );
+                    sendMessage(msgPayload.toJsonString(), topic, client);
+
+                    // Stop the stopwatch. Print time it measured.
+                    stopWatch.stop();
+                    double time = stopWatch.getNanoTime();
+                    time /= 1000000L;
+                    System.out.println("Milliseconds required for packet to prepare and be sent: " + time);
+                    packetNum++;
+                    if(packetNum > 0)
+                        packetTimes.add(time);
+                    if (packetNum == 500){
+                        countAvg();
+                        System.exit(0);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        }, 0, 1000);
+        }, 0, 750);
 
 
         System.out.println("Message sent!");

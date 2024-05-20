@@ -11,7 +11,13 @@ public class MqttMsgPayload implements Serializable {
     public byte[] signature;
     public byte[] x509Certificate;
 
+    public MqttMsgPayload(){}
 
+    public MqttMsgPayload(MessageStruct messageStruct, byte[] signature, byte[] x509Certificate) {
+        this.messageStruct = messageStruct;
+        this.signature = signature;
+        this.x509Certificate = x509Certificate;
+    }
 
     public String toJsonString() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();

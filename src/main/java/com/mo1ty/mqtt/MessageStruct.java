@@ -3,6 +3,7 @@ package com.mo1ty.mqtt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
@@ -40,6 +41,11 @@ public class MessageStruct implements Serializable {
     public byte[] toJsonStringAsBytes() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writer().writeValueAsString(this).getBytes(StandardCharsets.UTF_8);
+    }
+
+    public static MessageStruct getFromBytes(byte[] message) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.reader().readValue(new String(message, StandardCharsets.UTF_8), MessageStruct.class);
     }
 
 }
