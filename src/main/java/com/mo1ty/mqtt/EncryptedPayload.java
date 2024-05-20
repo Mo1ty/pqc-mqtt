@@ -2,19 +2,20 @@ package com.mo1ty.mqtt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
-public class MqttMsgPayload implements Serializable {
+public class EncryptedPayload {
 
-    public MessageStruct messageStruct;
+    public byte[] encryptedMessage;
+    public String algorithmIdentifier;
     public byte[] signature;
     public byte[] x509Certificate;
 
-    public MqttMsgPayload(){}
+    public EncryptedPayload(){}
 
-    public MqttMsgPayload(MessageStruct messageStruct, byte[] signature, byte[] x509Certificate) {
-        this.messageStruct = messageStruct;
+    public EncryptedPayload(byte[] encryptedMessage, String algorithmIdentifier, byte[] signature, byte[] x509Certificate) {
+        this.encryptedMessage = encryptedMessage;
+        this.algorithmIdentifier = algorithmIdentifier;
         this.signature = signature;
         this.x509Certificate = x509Certificate;
     }
@@ -24,9 +25,9 @@ public class MqttMsgPayload implements Serializable {
         return objectMapper.writer().writeValueAsString(this);
     }
 
-    public static MqttMsgPayload getFromJsonString(byte[] jsonString) throws Exception {
+    public static EncryptedPayload getFromJsonString(byte[] jsonString) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonStr = new String(jsonString, StandardCharsets.UTF_8);
-        return objectMapper.reader().readValue(jsonStr, MqttMsgPayload.class);
+        return objectMapper.reader().readValue(jsonStr, EncryptedPayload.class);
     }
 }
