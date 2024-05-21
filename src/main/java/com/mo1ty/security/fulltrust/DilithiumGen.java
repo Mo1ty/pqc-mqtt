@@ -24,8 +24,8 @@ public class DilithiumGen implements CertGen {
     }
 
     // preferred to use with "Dilithium"
-    public KeyPair generateKeyPair(String algorithmInstance) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithmInstance, "BC");
+    public KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("dilithium", "BC");
         keyPairGenerator.initialize(DilithiumParameterSpec.dilithium5, new SecureRandom());
 
         return keyPairGenerator.generateKeyPair();

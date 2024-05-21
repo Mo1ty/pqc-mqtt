@@ -24,8 +24,8 @@ public class FalconGen implements CertGen {
     }
 
     // preferred to use with "Falcon"
-    public KeyPair generateKeyPair(String algorithmInstance) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithmInstance, "BC");
+    public KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("falcon", "BC");
         keyPairGenerator.initialize(FalconParameterSpec.falcon_1024, new SecureRandom());
 
         return keyPairGenerator.generateKeyPair();

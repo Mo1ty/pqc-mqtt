@@ -18,6 +18,9 @@ import java.util.List;
 
 public class SecLv1SubscriberApp {
 
+    private static final CertGen certGen = new FalconGen();
+    private static final String connectionUrl = "tcp://192.168.0.249:1883";
+
     private static int packetNum = -100;
     private static List<Double> packetTimes = new ArrayList<>();
 
@@ -57,12 +60,8 @@ public class SecLv1SubscriberApp {
 
 
     public static void main(String[] args) throws Exception {
-
-        String connectionUrl = "tcp://192.168.0.249:1883";
         String connId = "PC_SUB_LV1";
         String topic = "test/topic";
-        String testMessage = "TEST_MESSAGE";
-
 
         MqttAsyncClient mqttClient = new MqttAsyncClient(connectionUrl, connId, new MemoryPersistence());
         mqttClient.setCallback(new MqttCallback() {
@@ -88,7 +87,6 @@ public class SecLv1SubscriberApp {
                 byte[] jsonData = message.getPayload();
                 MqttMsgPayload msg = MqttMsgPayload.getFromJsonString(jsonData);
 
-                CertGen certGen = new FalconGen();
                 CertificateFactory cf = CertificateFactory.getInstance("X.509");
                 InputStream in = new ByteArrayInputStream(msg.x509Certificate);
                 X509Certificate cert = (X509Certificate) cf.generateCertificate(in);

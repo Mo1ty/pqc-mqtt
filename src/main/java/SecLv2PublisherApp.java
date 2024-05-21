@@ -30,7 +30,9 @@ import java.util.concurrent.Executors;
 
 public class SecLv2PublisherApp {
 
+    private static final CertGen certGen = new DummyGen();
     private static final String connectionUrl = "tcp://192.168.0.249:1883";
+
     private static final String connId = "RPI_ZERO_W_1";
 
     private static final String topic = "test/topic";
@@ -110,8 +112,7 @@ public class SecLv2PublisherApp {
 
         // GENERATE A SELF-SIGNED CERTIFICATE TO SIGN AND VERIFY MESSAGES
         System.out.println("CERTIFICATE INITIATED!");
-        CertGen certGen = new DummyGen();
-        KeyPair keyPair = certGen.generateKeyPair("dummy");
+        KeyPair keyPair = certGen.generateKeyPair();
         Long certificateLength = 6 * 24 * 60 * 60 * 1000L; // 6 days
         X509Certificate certificate = certGen.genSelfSignedCert(keyPair, certificateLength);
         System.out.println("CERTIFICATE DONE!");
