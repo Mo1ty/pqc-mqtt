@@ -1,7 +1,6 @@
 import com.mo1ty.mqtt.MessageStruct;
 import com.mo1ty.mqtt.MqttMsgPayload;
 import com.mo1ty.security.fulltrust.CertGen;
-import com.mo1ty.security.fulltrust.DummyGen;
 import com.mo1ty.security.fulltrust.FalconGen;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.StopWatch;

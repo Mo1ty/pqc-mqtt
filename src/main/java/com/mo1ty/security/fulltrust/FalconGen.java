@@ -24,6 +24,7 @@ public class FalconGen implements CertGen {
     }
 
     // preferred to use with "Falcon"
+    @Override
     public KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("falcon", "BC");
         keyPairGenerator.initialize(FalconParameterSpec.falcon_1024, new SecureRandom());
@@ -31,7 +32,7 @@ public class FalconGen implements CertGen {
         return keyPairGenerator.generateKeyPair();
     }
 
-
+    @Override
     public X509Certificate genSelfSignedCert(KeyPair keyPair, Long certValidityMillis) throws Exception {
 
         PrivateKey privKey = keyPair.getPrivate();
@@ -59,6 +60,7 @@ public class FalconGen implements CertGen {
         return baseCert;
     }
 
+    @Override
     public byte[] signMessage(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         Signature falconSign = Signature.getInstance("Falcon-1024", "BC");
         falconSign.initSign(keyPair.getPrivate());
@@ -66,6 +68,7 @@ public class FalconGen implements CertGen {
         return falconSign.sign();
     }
 
+    @Override
     public byte[] hashAndSignMessage(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA3-512");
         Signature falconSign = Signature.getInstance("Falcon-1024", "BC");
@@ -75,6 +78,7 @@ public class FalconGen implements CertGen {
         return falconSign.sign();
     }
 
+    @Override
     public boolean verifyMessage(PublicKey publicKey, byte[] message, byte[] signature) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         Signature falconVerify = Signature.getInstance("Falcon-1024", "BC");
         falconVerify.initVerify(publicKey);
@@ -82,6 +86,7 @@ public class FalconGen implements CertGen {
         return falconVerify.verify(signature);
     }
 
+    @Override
     public boolean verifyHashedMessage(PublicKey publicKey, byte[] message, byte[] signature) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA3-512");
         Signature falconVerify = Signature.getInstance("Falcon-1024", "BC");

@@ -24,6 +24,7 @@ public class DilithiumGen implements CertGen {
     }
 
     // preferred to use with "Dilithium"
+    @Override
     public KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("dilithium", "BC");
         keyPairGenerator.initialize(DilithiumParameterSpec.dilithium5, new SecureRandom());
@@ -31,7 +32,7 @@ public class DilithiumGen implements CertGen {
         return keyPairGenerator.generateKeyPair();
     }
 
-
+    @Override
     public X509Certificate genSelfSignedCert(KeyPair keyPair, Long certValidityMillis) throws Exception {
 
         PrivateKey privKey = keyPair.getPrivate();
@@ -59,6 +60,7 @@ public class DilithiumGen implements CertGen {
         return baseCert;
     }
 
+    @Override
     public byte[] signMessage(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         Signature dilithiumSign = Signature.getInstance("dilithium5", "BC");
         dilithiumSign.initSign(keyPair.getPrivate());
@@ -66,6 +68,7 @@ public class DilithiumGen implements CertGen {
         return dilithiumSign.sign();
     }
 
+    @Override
     public byte[] hashAndSignMessage(KeyPair keyPair, byte[] message) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA3-512");
         Signature dilithiumSign = Signature.getInstance("dilithium5", "BC");
@@ -75,6 +78,7 @@ public class DilithiumGen implements CertGen {
         return dilithiumSign.sign();
     }
 
+    @Override
     public boolean verifyMessage(PublicKey publicKey, byte[] message, byte[] signature) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         Signature dilithiumVerify = Signature.getInstance("dilithium5", "BC");
         dilithiumVerify.initVerify(publicKey);
@@ -82,6 +86,7 @@ public class DilithiumGen implements CertGen {
         return dilithiumVerify.verify(signature);
     }
 
+    @Override
     public boolean verifyHashedMessage(PublicKey publicKey, byte[] message, byte[] signature) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA3-512");
         Signature dilithiumVerify = Signature.getInstance("dilithium5", "BC");
