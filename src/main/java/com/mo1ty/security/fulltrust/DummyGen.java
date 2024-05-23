@@ -24,7 +24,7 @@ public class DummyGen implements CertGen {
     }
 
     @Override
-    public KeyPair generateKeyPair(String algorithmInstance) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+    public KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("dilithium", "BC");
         keyPairGenerator.initialize(DilithiumParameterSpec.dilithium5, new SecureRandom());
 

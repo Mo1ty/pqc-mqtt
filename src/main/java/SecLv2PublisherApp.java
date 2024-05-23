@@ -4,7 +4,7 @@ import com.mo1ty.mqtt.MqttMsgPayload;
 import com.mo1ty.security.crypto.AesUtil;
 import com.mo1ty.security.crypto.KyberClientUtil;
 import com.mo1ty.security.fulltrust.CertGen;
-import com.mo1ty.security.fulltrust.DummyGen;
+import com.mo1ty.security.fulltrust.FalconGen;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
@@ -30,7 +30,9 @@ import java.util.concurrent.Executors;
 
 public class SecLv2PublisherApp {
 
+    private static final CertGen certGen = new FalconGen();
     private static final String connectionUrl = "tcp://192.168.0.249:1883";
+
     private static final String connId = "RPI_ZERO_W_1";
 
     private static final String topic = "test/topic";
@@ -101,8 +103,12 @@ public class SecLv2PublisherApp {
     public static void main(String[] args) throws Exception {
 
         commMessage = RandomStringUtils.randomAlphanumeric(1024);
-
         System.out.println(commMessage);
+
+        Thread.sleep(30000);
+
+        StopWatch initStopWatch = new StopWatch();
+        initStopWatch.start();
 
         System.out.println("INITIATING CONNECTION!");
 
@@ -110,8 +116,7 @@ public class SecLv2PublisherApp {
 
         // GENERATE A SELF-SIGNED CERTIFICATE TO SIGN AND VERIFY MESSAGES
         System.out.println("CERTIFICATE INITIATED!");
-        CertGen certGen = new DummyGen();
-        KeyPair keyPair = certGen.generateKeyPair("dummy");
+        KeyPair keyPair = certGen.generateKeyPair();
         Long certificateLength = 6 * 24 * 60 * 60 * 1000L; // 6 days
         X509Certificate certificate = certGen.genSelfSignedCert(keyPair, certificateLength);
         System.out.println("CERTIFICATE DONE!");
@@ -179,7 +184,10 @@ public class SecLv2PublisherApp {
         System.out.println("BROKER ACCEPTED AES KEY!");
 
         // Finish time count to see connection time needed
-        System.out.println(System.currentTimeMillis());
+        initStopWatch.stop();
+        double time = initStopWatch.getNanoTime();
+        time /= 1000000L;
+        System.out.println("Milliseconds required for connection to be established: " + time);
 
         // SETUP TIMER TO SEND ENCRYPTED MESSAGES
         new Timer().schedule(new TimerTask() {

@@ -4,7 +4,7 @@ import com.mo1ty.mqtt.MqttMsgPayload;
 import com.mo1ty.security.crypto.AesUtil;
 import com.mo1ty.security.crypto.KyberClientUtil;
 import com.mo1ty.security.fulltrust.CertGen;
-import com.mo1ty.security.fulltrust.DummyGen;
+import com.mo1ty.security.fulltrust.FalconGen;
 import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
@@ -30,6 +30,9 @@ import java.util.concurrent.Executors;
 
 public class SecLv2SubscriberApp {
 
+    private static final CertGen certGen = new FalconGen();
+    private static final String connectionUrl = "tcp://192.168.0.249:1883";
+
     private static final String initMessage = "INIT_CONN_2";
 
     private static final String initTopic = "test/init/topic";
@@ -43,7 +46,7 @@ public class SecLv2SubscriberApp {
     private static CompletableFuture<PublicKey> publicKey = new CompletableFuture<>();
     private static CompletableFuture<String> aesKey = new CompletableFuture<>();
 
-    private static final CertGen certGen = new DummyGen();
+
     private static final KyberClientUtil kyberClientUtil = new KyberClientUtil();
     private static final AesUtil aesUtil = new AesUtil();
 
@@ -98,7 +101,6 @@ public class SecLv2SubscriberApp {
     }
 
     public static void main(String[] args) throws Exception {
-        String connectionUrl = "tcp://192.168.0.249:1883";
         String connId = "RPI_MODEL_1_B";
         String topic = "test/topic";
 
@@ -108,7 +110,7 @@ public class SecLv2SubscriberApp {
 
         // GENERATE A SELF-SIGNED CERTIFICATE TO SIGN AND VERIFY MESSAGES
         System.out.println("CERTIFICATE INITIATED!");
-        KeyPair keyPair = certGen.generateKeyPair("dummy");
+        KeyPair keyPair = certGen.generateKeyPair();
         Long certificateLength = 6 * 24 * 60 * 60 * 1000L; // 6 days
         X509Certificate certificate = certGen.genSelfSignedCert(keyPair, certificateLength);
         System.out.println("CERTIFICATE DONE!");

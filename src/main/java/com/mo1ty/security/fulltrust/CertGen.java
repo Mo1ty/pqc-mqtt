@@ -5,7 +5,7 @@ import java.security.cert.X509Certificate;
 
 public interface CertGen {
 
-    KeyPair generateKeyPair(String algorithmInstance) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException;
+    KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException;
 
     X509Certificate genSelfSignedCert(KeyPair keyPair, Long certValidityMillis) throws Exception;
 

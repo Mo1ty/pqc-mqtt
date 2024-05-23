@@ -20,6 +20,9 @@ import java.util.TimerTask;
 
 public class SecLv1PublisherApp {
 
+    private static final CertGen certGen = new FalconGen();
+    private static final String connectionUrl = "tcp://192.168.0.249:1883";
+
     private static int packetNum = -100;
     private static List<Double> packetTimes = new ArrayList<>();
 
@@ -85,7 +88,6 @@ public class SecLv1PublisherApp {
 
     public static void main(String[] args) throws Exception {
 
-        String connectionUrl = "tcp://192.168.0.249:1883";
         String connId = "PC_PUB_LV1";
         String topic = "test/topic";
         String testMessage = RandomStringUtils.randomAlphanumeric(128);
@@ -96,8 +98,7 @@ public class SecLv1PublisherApp {
 
         // GENERATE A SELF-SIGNED CERTIFICATE TO SIGN AND VERIFY MESSAGES
         System.out.println("CERTIFICATE INITIATED!");
-        CertGen certGen = new FalconGen();
-        KeyPair keyPair = certGen.generateKeyPair("falcon");
+        KeyPair keyPair = certGen.generateKeyPair();
         Long certificateLength = 6 * 24 * 60 * 60 * 1000L; // 6 days
         X509Certificate certificate = certGen.genSelfSignedCert(keyPair, certificateLength);
         System.out.println("CERTIFICATE DONE!");
