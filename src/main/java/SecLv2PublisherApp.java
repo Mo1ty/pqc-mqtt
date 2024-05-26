@@ -105,8 +105,6 @@ public class SecLv2PublisherApp {
         commMessage = RandomStringUtils.randomAlphanumeric(1024);
         System.out.println(commMessage);
 
-        Thread.sleep(30000);
-
         StopWatch initStopWatch = new StopWatch();
         initStopWatch.start();
 
